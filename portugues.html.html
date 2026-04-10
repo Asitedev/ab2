@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Língua Portuguesa</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #120608;
+    --card: #1e0a0d;
+    --border: #3d1218;
+    --accent1: #e63946;
+    --accent2: #f4a261;
+    --accent3: #52b788;
+    --accent4: #c77dff;
+    --accent5: #ffd166;
+    --text: #f0e6e8;
+    --muted: #7a4a50;
+    --correct: #52b788;
+    --wrong: #e63946;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Space Mono', monospace; min-height: 100vh; overflow-x: hidden; }
+  body::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      radial-gradient(circle at 10% 30%, rgba(230,57,70,0.06) 0%, transparent 50%),
+      radial-gradient(circle at 90% 70%, rgba(199,125,255,0.04) 0%, transparent 50%),
+      linear-gradient(rgba(230,57,70,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(230,57,70,0.015) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+  }
+  .container { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 2rem 1rem; }
+
+  header { text-align: center; padding: 3rem 0 2rem; border-bottom: 1px solid var(--border); margin-bottom: 2.5rem; }
+  header .tag { font-size: 0.7rem; letter-spacing: 0.3em; color: var(--accent1); text-transform: uppercase; margin-bottom: 1rem; display: block; }
+  header h1 { font-family: 'Syne', sans-serif; font-size: clamp(2rem, 6vw, 4rem); font-weight: 800; line-height: 1; background: linear-gradient(135deg, var(--accent1), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.5rem; }
+  header p { color: var(--muted); font-size: 0.85rem; }
+
+  .tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
+  .tab-btn { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 0.5rem 1rem; cursor: pointer; font-family: 'Space Mono', monospace; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; transition: all 0.2s; border-radius: 2px; }
+  .tab-btn:hover { border-color: var(--accent1); color: var(--accent1); }
+  .tab-btn.active { background: var(--accent1); color: #fff; border-color: var(--accent1); font-weight: 700; }
+
+  .panel { display: none; animation: fadeIn 0.3s ease; }
+  .panel.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .section-title { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); padding: 1.5rem; border-radius: 4px; transition: border-color 0.2s, transform 0.2s; }
+  .card:hover { border-color: var(--accent1); transform: translateY(-2px); }
+  .card h3 { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--accent1); }
+  .card p { font-size: 0.78rem; line-height: 1.7; color: #c9a0a5; }
+  .card ul { list-style: none; }
+  .card ul li { font-size: 0.78rem; padding: 0.25rem 0; padding-left: 1rem; position: relative; color: #c9a0a5; line-height: 1.6; }
+  .card ul li::before { content: '▸'; position: absolute; left: 0; color: var(--accent2); }
+
+  .info-box { background: rgba(230,57,70,0.06); border: 1px solid rgba(230,57,70,0.2); border-radius: 4px; padding: 1rem 1.25rem; margin: 0.75rem 0; font-size: 0.78rem; line-height: 1.7; color: #c9a0a5; }
+  .info-box strong { color: var(--accent1); }
+  .info-box.orange { background: rgba(244,162,97,0.06); border-color: rgba(244,162,97,0.25); }
+  .info-box.orange strong { color: var(--accent2); }
+  .info-box.green { background: rgba(82,183,136,0.06); border-color: rgba(82,183,136,0.25); }
+  .info-box.green strong { color: var(--accent3); }
+  .info-box.purple { background: rgba(199,125,255,0.06); border-color: rgba(199,125,255,0.25); }
+  .info-box.purple strong { color: var(--accent4); }
+
+  /* TIMELINE */
+  .timeline { position: relative; padding-left: 2.5rem; }
+  .timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+  .timeline-item { position: relative; padding: 1rem 1rem 1rem 1.5rem; margin-bottom: 0.75rem; background: var(--card); border: 1px solid var(--border); border-radius: 4px; cursor: pointer; transition: all 0.2s; }
+  .timeline-item::before { content: ''; position: absolute; left: -2.1rem; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; border-radius: 50%; background: var(--border); transition: background 0.2s; }
+  .timeline-item:hover, .timeline-item.open { border-color: var(--accent1); }
+  .timeline-item:hover::before, .timeline-item.open::before { background: var(--accent1); }
+  .timeline-head { display: flex; align-items: center; gap: 0.75rem; }
+  .timeline-year { font-size: 0.65rem; color: var(--accent1); font-weight: 700; min-width: 55px; font-family: 'Space Mono', monospace; }
+  .timeline-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; }
+  .timeline-body { display: none; margin-top: 0.75rem; font-size: 0.78rem; color: #c9a0a5; line-height: 1.7; border-top: 1px solid var(--border); padding-top: 0.75rem; }
+  .timeline-item.open .timeline-body { display: block; }
+
+  /* FLIP CARDS */
+  .flip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+  .flip-card { height: 155px; cursor: pointer; perspective: 1000px; }
+  .flip-inner { position: relative; width: 100%; height: 100%; transition: transform 0.5s; transform-style: preserve-3d; }
+  .flip-card.flipped .flip-inner { transform: rotateY(180deg); }
+  .flip-front, .flip-back { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 4px; display: flex; align-items: center; justify-content: center; padding: 1rem; text-align: center; font-size: 0.78rem; line-height: 1.5; }
+  .flip-front { background: var(--card); border: 1px solid var(--border); flex-direction: column; gap: 0.4rem; }
+  .flip-front .emoji { font-size: 1.6rem; }
+  .flip-front span { color: var(--accent4); font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.85rem; }
+  .flip-back { background: #100516; border: 1px solid var(--accent4); color: var(--accent4); transform: rotateY(180deg); font-size: 0.72rem; }
+  .hint { color: var(--muted); font-size: 0.6rem; }
+
+  /* COMUNICAÇÃO DIAGRAM */
+  .com-diagram { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 2rem; margin: 1.5rem 0; }
+  .com-row { display: flex; align-items: center; justify-content: center; gap: 0.75rem; flex-wrap: wrap; margin: 0.5rem 0; }
+  .com-node {
+    background: var(--bg);
+    border: 2px solid var(--border);
+    padding: 0.6rem 1rem;
+    border-radius: 4px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    min-width: 110px;
+  }
+  .com-node:hover, .com-node.active { transform: scale(1.05); }
+  .com-node.remetente { border-color: var(--accent1); color: var(--accent1); }
+  .com-node.destinatario { border-color: var(--accent2); color: var(--accent2); }
+  .com-node.mensagem { border-color: var(--accent3); color: var(--accent3); }
+  .com-node.canal { border-color: var(--accent5); color: var(--accent5); }
+  .com-node.codigo { border-color: var(--accent4); color: var(--accent4); }
+  .com-node.contexto { border-color: #94a3b8; color: #94a3b8; }
+  .com-arrow { color: var(--muted); font-size: 1.2rem; }
+  .com-info { background: #0a0204; border: 1px solid var(--border); border-radius: 4px; padding: 0.75rem 1rem; margin-top: 1rem; font-size: 0.78rem; color: #c9a0a5; min-height: 48px; line-height: 1.6; transition: all 0.3s; }
+
+  /* TABLE */
+  table { width: 100%; border-collapse: collapse; font-size: 0.75rem; margin: 0.75rem 0; }
+  th { background: #2a0810; padding: 0.75rem; text-align: left; font-family: 'Syne', sans-serif; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); border-bottom: 1px solid var(--border); }
+  td { padding: 0.75rem; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.6; color: #c9a0a5; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  th.red { color: var(--accent1); }
+
+  /* QUIZ */
+  .quiz-wrap { max-width: 700px; margin: 0 auto; }
+  .question-box { background: var(--card); border: 1px solid var(--border); padding: 2rem; border-radius: 4px; margin-bottom: 1.5rem; }
+  .q-counter { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.1em; margin-bottom: 1rem; }
+  .q-text { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; margin-bottom: 1.5rem; line-height: 1.5; }
+  .options { display: flex; flex-direction: column; gap: 0.75rem; }
+  .opt-btn { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 0.85rem 1.25rem; text-align: left; cursor: pointer; font-family: 'Space Mono', monospace; font-size: 0.78rem; border-radius: 2px; transition: all 0.2s; line-height: 1.5; }
+  .opt-btn:hover:not(:disabled) { border-color: var(--accent1); color: var(--accent1); }
+  .opt-btn.correct { border-color: var(--correct); color: var(--correct); background: #071a10; }
+  .opt-btn.wrong { border-color: var(--wrong); color: var(--wrong); background: #1a0507; }
+  .opt-btn:disabled { cursor: default; }
+  .feedback { padding: 0.75rem 1rem; border-radius: 2px; font-size: 0.78rem; margin-top: 1rem; line-height: 1.6; display: none; }
+  .feedback.show { display: block; }
+  .feedback.ok { background: #071a10; border: 1px solid var(--correct); color: var(--correct); }
+  .feedback.bad { background: #1a0507; border: 1px solid var(--wrong); color: var(--wrong); }
+  .quiz-actions { display: flex; gap: 1rem; align-items: center; }
+  .btn { background: var(--accent1); color: #fff; border: none; padding: 0.75rem 1.5rem; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.85rem; cursor: pointer; border-radius: 2px; }
+  .btn:hover { opacity: 0.85; }
+  .score-bar { flex: 1; background: var(--border); height: 6px; border-radius: 3px; overflow: hidden; }
+  .score-fill { height: 100%; background: var(--accent3); transition: width 0.5s; border-radius: 3px; }
+  .score-text { font-size: 0.72rem; color: var(--muted); min-width: 50px; text-align: right; }
+  .result-panel { text-align: center; padding: 3rem; background: var(--card); border: 1px solid var(--border); border-radius: 4px; display: none; }
+  .result-panel.show { display: block; }
+  .result-score { font-family: 'Syne', sans-serif; font-size: 4rem; font-weight: 800; color: var(--accent3); }
+  .result-msg { color: var(--muted); margin: 1rem 0 2rem; font-size: 0.85rem; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media(max-width:600px){ .two-col{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <span class="tag">Simulação Interativa — AB1</span>
+    <h1>Língua Portuguesa</h1>
+    <p>Jornalismo · Língua & Linguagem · Literatura Medieval</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" onclick="showTab('jornal',this)">📰 Jornalismo</button>
+    <button class="tab-btn" onclick="showTab('lingua',this)">💬 Língua</button>
+    <button class="tab-btn" onclick="showTab('textos',this)">📝 Tipos Textuais</button>
+    <button class="tab-btn" onclick="showTab('comunicacao',this)">📡 Comunicação</button>
+    <button class="tab-btn" onclick="showTab('literatura',this)">📖 Literatura</button>
+    <button class="tab-btn" onclick="showTab('quiz',this)">🎯 Quiz</button>
+    <button class="tab-btn" onclick="showTab('resumo',this)">📋 Resumo</button>
+  </nav>
+
+  <!-- JORNALISMO -->
+  <div id="panel-jornal" class="panel active">
+    <div class="section-title"><div class="dot" style="background:var(--accent1)"></div>Primeira Página de Jornal</div>
+    <div class="info-box">A <strong>primeira página de jornal</strong> traz uma visão geral sobre os principais fatos do dia, mostrando ao leitor, de forma resumida, o que consta naquela edição. A equipe editorial seleciona os fatos de maior relevância para despertar o interesse do público para a leitura das matérias.</div>
+
+    <div class="cards-grid" style="margin-bottom:1.5rem">
+      <div class="card">
+        <h3>📋 Cabeçalho</h3>
+        <p>Apresenta informações básicas sobre a publicação (nome do jornal, data, edição).</p>
+      </div>
+      <div class="card">
+        <h3>📢 Manchete</h3>
+        <p>Título da matéria principal. Traz mensagem concisa e breve, escrita com letras maiores para se destacar graficamente.</p>
+      </div>
+      <div class="card">
+        <h3>📌 Chamadas</h3>
+        <p>Textos curtos que anunciam as matérias mais importantes do jornal. Funcionam como convites à leitura.</p>
+      </div>
+      <div class="card">
+        <h3>📏 Linha Fina</h3>
+        <p>Frase que aparece logo abaixo do título de uma matéria. Ela complementa as informações do título.</p>
+      </div>
+      <div class="card">
+        <h3>🖼️ Imagens</h3>
+        <p>Podem ser fotografias, gráficos e infográficos. Complementam as chamadas. A primeira página é um exemplo de <strong>texto multimodal</strong> (verbal + não verbal).</p>
+      </div>
+      <div class="card">
+        <h3>📎 Legenda</h3>
+        <p>Texto que acompanha a fotografia. Além de descrever e situar o retratado, acrescenta informações à matéria vinculada.</p>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:2rem"><div class="dot" style="background:var(--accent2)"></div>Reportagem</div>
+    <div class="two-col">
+      <div class="info-box orange">
+        <strong>Reportagem:</strong> aborda um assunto ou acontecimento de interesse coletivo. Tem caráter investigativo — o jornalista realiza pesquisa para recolher dados e analisá-los. É mais extensa que a notícia e pode empregar linguagem mais informal.
+      </div>
+      <div>
+        <div class="info-box orange"><strong>Estrutura:</strong> título, subtítulo, principais informações no(s) primeiro(s) parágrafo(s) — o lide — e intertítulos.</div>
+        <div class="info-box orange" style="margin-top:0.5rem"><strong>Lide:</strong> parágrafo(s) inicial(is) com as principais informações sobre o fato noticiado. Responde: o quê, quem, quando e onde.</div>
+        <div class="info-box orange" style="margin-top:0.5rem"><strong>Texto multimodal:</strong> pode utilizar fotografias, esquemas, gráficos e infográficos.</div>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:2rem"><div class="dot" style="background:var(--accent3)"></div>Notícia</div>
+    <div class="two-col">
+      <div class="info-box green"><strong>Notícia:</strong> texto essencialmente informativo que expõe um fato considerado relevante para determinado grupo de pessoas ou para a sociedade em geral.</div>
+      <div class="info-box green"><strong>Estrutura:</strong> título, lide, pode ter fotografia e legenda.</div>
+    </div>
+
+    <div class="section-title" style="margin-top:2rem"><div class="dot" style="background:var(--accent4)"></div>Flashcards — Jornalismo</div>
+    <div class="flip-grid">
+      <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-inner"><div class="flip-front"><span class="emoji">📢</span><span>Manchete</span><div class="hint">toque</div></div><div class="flip-back">Título da matéria principal. Letras maiores, mensagem concisa. Destaque gráfico máximo.</div></div></div>
+      <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-inner"><div class="flip-front"><span class="emoji">📏</span><span>Linha Fina</span><div class="hint">toque</div></div><div class="flip-back">Frase abaixo do título que complementa as informações. Mais detalhes que a manchete.</div></div></div>
+      <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-inner"><div class="flip-front"><span class="emoji">🗞️</span><span>Lide</span><div class="hint">toque</div></div><div class="flip-back">1º parágrafo da notícia/reportagem. Responde: o quê? quem? quando? onde? Concentra as principais informações.</div></div></div>
+      <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-inner"><div class="flip-front"><span class="emoji">🖼️</span><span>Texto Multimodal</span><div class="hint">toque</div></div><div class="flip-back">Usa mais de uma linguagem: verbal (palavras) + não verbal (imagens, gráficos, infográficos). Ex: primeira página de jornal.</div></div></div>
+    </div>
+  </div>
+
+  <!-- LÍNGUA E LINGUAGEM -->
+  <div id="panel-lingua" class="panel">
+    <div class="section-title"><div class="dot" style="background:var(--accent1)"></div>Língua × Linguagem</div>
+
+    <div class="two-col">
+      <div class="card" style="border-color:rgba(230,57,70,0.4)">
+        <h3>🔤 Língua</h3>
+        <p>Conjunto de elementos organizados por <strong style="color:var(--accent1)">regras gramaticais específicas</strong>, que permitem transmitir mensagens compreensíveis para os indivíduos de determinado grupo.</p>
+        <br>
+        <p>Exemplos: a língua portuguesa (escrita ou falada) e a Língua Brasileira de Sinais (Libras).</p>
+      </div>
+      <div class="card" style="border-color:rgba(244,162,97,0.4)">
+        <h3 style="color:var(--accent2)">📡 Linguagem</h3>
+        <p>Todo sistema de sinais que <strong style="color:var(--accent2)">permite a comunicação</strong>. Esses sinais podem ser verbais (fala e escrita) ou não verbais (gestos e expressões faciais).</p>
+      </div>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="info-box"><strong>Linguagem verbal:</strong> comunicação realizada por meio de palavras, orais ou escritas.</div>
+      <div class="info-box orange"><strong>Linguagem não verbal:</strong> comunicação realizada por meio de sinais, imagens e símbolos.</div>
+    </div>
+    <div class="info-box" style="margin-top:0.5rem;text-align:center">
+      <strong>Textos multimodais</strong> são aqueles que utilizam mais de uma linguagem em sua composição.
+    </div>
+
+    <div class="section-title" style="margin-top:2rem"><div class="dot" style="background:var(--accent2)"></div>Gramática Normativa × Internalizada</div>
+    <div class="two-col">
+      <div class="card">
+        <h3>📚 Gramática Normativa</h3>
+        <p>Baseada no uso consagrado da língua por gramáticos e escritores clássicos. Descreve, sistematiza e propõe um conjunto de normas que orientam a fala e a escrita.</p>
+      </div>
+      <div class="card" style="border-color:rgba(82,183,136,0.3)">
+        <h3 style="color:var(--accent3)">🧠 Gramática Internalizada</h3>
+        <p>A gramática assimilada <strong style="color:var(--accent3)">naturalmente por todo falante</strong> ao utilizar a língua. Aprendemos sem estudo formal — só de ouvir e praticar.</p>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:2rem"><div class="dot" style="background:var(--accent3)"></div>Variação Linguística</div>
+    <div class="two-col">
+      <div class="card">
+        <h3>📏 Norma-padrão</h3>
+        <p>O termo <strong>padrão</strong> significa regra/norma. A norma-padrão é um modelo de língua que estabelece regras de uso da língua.</p>
+      </div>
+      <div class="card" style="border-color:rgba(244,162,97,0.3)">
+        <h3 style="color:var(--accent2)">🗣️ Norma não padrão</h3>
+        <p>Caracterizada pela falta de preocupação com as regras da norma-padrão, além do emprego frequente de <strong style="color:var(--accent2)">gírias e expressões populares</strong>.</p>
+      </div>
+    </div>
+    <div class="info-box green" style="margin-top:0.75rem">
+      <strong>Variações da língua:</strong> A língua é dinâmica e apresenta variações situacionais, socioculturais, geográficas (regionais) e históricas.
+    </div>
+
+    <div class="section-title" style="margin-top:2rem"><div class="dot" style="background:var(--accent4)"></div>Flashcards — Língua & Linguagem</div>
+    <div class="flip-grid">
+      <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-inner"><div class="flip-front"><span class="emoji">🔤</span><span>Língua</span><div class="hint">toque</div></div><div class="flip-back">Sistema de regras gramaticais específicas de um grupo. Ex: português, inglês, Libras.</div></div></div>
+      <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-inner"><div class="flip-front"><span class="emoji">📡</span><span>Linguagem</span><div class="hint">toque</div></div><div class="flip-back">Todo sistema de sinais que permite comunicação. Verbal (palavras) ou não verbal (gestos, imagens, símbolos).</div></div></div>
+      <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-inner"><div class="flip-front"><span class="emoji">📚</span><span>Gram. Normativa</span><div class="hint">toque</div></div><div class="flip-back">Conjunto de normas formais baseadas no uso consagrado por gramáticos e escritores clássicos.</div></div></div>
+      <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-inner"><div class="flip-front"><span class="emoji">🌍</span><span>Variação Linguística</span><div class="hint">toque</div></div><div class="flip-back">A língua varia: situacional, sociocultural, geográfica (regional) e historicamente. É dinâmica e viva.</div></div></div>
+    </div>
+  </div>
+
+  <!-- TIPOS TEXTUAIS -->
+  <div id="panel-textos" class="panel">
+    <div class="section-title"><div class="dot" style="background:var(--accent2)"></div>Tipos Textuais</div>
+    <div class="info-box" style="margin-bottom:1.5rem">
+      <strong>Tipo textual</strong> está relacionado a aspectos sequenciais e de composição dos textos (características lexicais, estruturais e sintáticas). Refere-se às distintas formas como determinados textos se organizam.
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th class="red">Tipo</th>
+          <th class="red">Definição</th>
+          <th class="red">Exemplos</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong style="color:var(--accent1)">Descritivo</strong></td><td>Descreve pessoas, espaços, objetos etc., focalizando suas características.</td><td>Descrição de um personagem, paisagem</td></tr>
+        <tr><td><strong style="color:var(--accent2)">Narrativo</strong></td><td>Permite relatar fatos (reais ou imaginários) ocorridos em determinado tempo e espaço.</td><td>Conto, crônica, romance</td></tr>
+        <tr><td><strong style="color:var(--accent3)">Argumentativo</strong></td><td>Caracterizado pela defesa de um ponto de vista sobre determinado assunto.</td><td>Artigo de opinião, redação dissertativa</td></tr>
+        <tr><td><strong style="color:var(--accent5)">Expositivo</strong></td><td>Tem o objetivo de transmitir um conhecimento, sem a inclusão de opiniões.</td><td>Verbete, relatório científico</td></tr>
+        <tr><td><strong style="color:var(--accent4)">Injuntivo</strong></td><td>Tem o objetivo de instruir o leitor a fazer algo.</td><td>Receita, manual, regulamento</td></tr>
+      </tbody>
+    </table>
+
+    <div class="section-title" style="margin-top:2rem"><div class="dot" style="background:var(--accent3)"></div>Gêneros Textuais</div>
+    <div class="info-box green">
+      <strong>Gêneros textuais</strong> são textos que circulam em sociedade e têm traços específicos de comunicação, organização, uso da linguagem e função. Eles se concretizam por meio dos tipos textuais.
+    </div>
+    <div class="info-box" style="margin-top:0.5rem">
+      Diferença: o <strong>tipo textual</strong> é a forma como o texto se organiza; o <strong>gênero textual</strong> é o texto concreto que circula na sociedade. Ex: a carta pessoal (gênero) usa o tipo narrativo e/ou descritivo.
+    </div>
+
+    <div class="section-title" style="margin-top:2rem"><div class="dot" style="background:var(--accent4)"></div>Flashcards — Tipos Textuais</div>
+    <div class="flip-grid">
+      <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-inner"><div class="flip-front"><span class="emoji">🖼️</span><span>Descritivo</span><div class="hint">toque</div></div><div class="flip-back">Descreve características de pessoas, lugares, objetos. Foco nas qualidades sensoriais. Ex: descrição de personagem.</div></div></div>
+      <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-inner"><div class="flip-front"><span class="emoji">📖</span><span>Narrativo</span><div class="hint">toque</div></div><div class="flip-back">Relata fatos reais ou imaginários com tempo, espaço, personagens e enredo. Ex: conto, crônica, romance.</div></div></div>
+      <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-inner"><div class="flip-front"><span class="emoji">⚖️</span><span>Argumentativo</span><div class="hint">toque</div></div><div class="flip-back">Defende um ponto de vista com argumentos. Ex: artigo de opinião, redação do ENEM.</div></div></div>
+      <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-inner"><div class="flip-front"><span class="emoji">🔬</span><span>Expositivo</span><div class="hint">toque</div></div><div class="flip-back">Transmite conhecimento sem opiniões. Objetivo e imparcial. Ex: verbete, relatório, artigo científico.</div></div></div>
+      <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-inner"><div class="flip-front"><span class="emoji">📋</span><span>Injuntivo</span><div class="hint">toque</div></div><div class="flip-back">Instrui o leitor a fazer algo. Usa verbos no imperativo. Ex: receita culinária, manual, bula.</div></div></div>
+    </div>
+  </div>
+
+  <!-- COMUNICAÇÃO -->
+  <div id="panel-comunicacao" class="panel">
+    <div class="section-title"><div class="dot" style="background:var(--accent3)"></div>Mundo e Ato da Comunicação</div>
+    <p style="font-size:0.78rem;color:var(--muted);margin-bottom:1rem">Clique em cada elemento para saber mais sobre sua função.</p>
+
+    <div class="com-diagram">
+      <div class="com-row">
+        <div class="com-node contexto" onclick="showCom('contexto')">🌍 Referente / Contexto</div>
+      </div>
+      <div class="com-row" style="margin:1rem 0">
+        <div class="com-node remetente" onclick="showCom('remetente')">👤 Remetente</div>
+        <div class="com-arrow">→</div>
+        <div style="display:flex;flex-direction:column;gap:0.4rem">
+          <div class="com-node mensagem" onclick="showCom('mensagem')">💬 Mensagem</div>
+          <div class="com-node canal" onclick="showCom('canal')">📶 Canal / Contato</div>
+        </div>
+        <div class="com-arrow">→</div>
+        <div class="com-node destinatario" onclick="showCom('destinatario')">👥 Destinatário</div>
+      </div>
+      <div class="com-row">
+        <div class="com-node codigo" onclick="showCom('codigo')">🔑 Código</div>
+      </div>
+      <div class="com-info" id="com-info">Clique em um elemento do ato comunicativo ↑</div>
+    </div>
+
+    <div class="section-title" style="margin-top:2rem"><div class="dot" style="background:var(--accent2)"></div>Funções da Linguagem</div>
+    <div class="info-box">Cada elemento comunicativo determina uma <strong>função da linguagem</strong> diferente, de acordo com as características e a finalidade do texto.</div>
+
+    <table style="margin-top:1rem">
+      <thead><tr><th class="red">Função</th><th class="red">Foco</th><th class="red">Características</th></tr></thead>
+      <tbody>
+        <tr><td><strong style="color:var(--accent1)">Expressiva / Emotiva</strong></td><td>Remetente</td><td>Expressa sentimentos e emoções do emissor. Ex: interjeições, poesia lírica.</td></tr>
+        <tr><td><strong style="color:var(--accent2)">Apelativa / Conativa</strong></td><td>Destinatário</td><td>Busca influenciar o receptor. Usa vocativos e imperativo. Ex: propagandas, ordens.</td></tr>
+        <tr><td><strong style="color:#94a3b8">Referencial / Denotativa</strong></td><td>Referente/Contexto</td><td>Transmite informações objetivas. Ex: notícias, textos científicos.</td></tr>
+        <tr><td><strong style="color:var(--accent3)">Poética</strong></td><td>Mensagem</td><td>Foco na forma da mensagem, estética da linguagem. Ex: poesia, literatura.</td></tr>
+        <tr><td><strong style="color:var(--accent5)">Fática</strong></td><td>Canal/Contato</td><td>Verifica ou mantém o canal de comunicação. Ex: "Alô?", "tá me ouvindo?"</td></tr>
+        <tr><td><strong style="color:var(--accent4)">Metalinguística</strong></td><td>Código</td><td>A linguagem fala sobre ela mesma. Ex: gramática, dicionário, poema sobre poesia.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="section-title" style="margin-top:2rem"><div class="dot" style="background:var(--accent4)"></div>Flashcards — Funções da Linguagem</div>
+    <div class="flip-grid">
+      <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-inner"><div class="flip-front"><span class="emoji">❤️</span><span>Expressiva</span><div class="hint">toque</div></div><div class="flip-back">Foco no REMETENTE. Expressa sentimentos e emoções do emissor. Ex: "Que saudade!", poesia lírica.</div></div></div>
+      <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-inner"><div class="flip-front"><span class="emoji">📢</span><span>Apelativa</span><div class="hint">toque</div></div><div class="flip-back">Foco no DESTINATÁRIO. Quer persuadir ou influenciar. Ex: propaganda, discurso político, ordens.</div></div></div>
+      <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-inner"><div class="flip-front"><span class="emoji">📰</span><span>Referencial</span><div class="hint">toque</div></div><div class="flip-back">Foco no CONTEXTO/REFERENTE. Informa objetivamente. Ex: notícia, bula de remédio, relatório.</div></div></div>
+      <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-inner"><div class="flip-front"><span class="emoji">🎭</span><span>Poética</span><div class="hint">toque</div></div><div class="flip-back">Foco na MENSAGEM. Cuida da forma, estética e beleza da linguagem. Ex: poesia, literatura.</div></div></div>
+      <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-inner"><div class="flip-front"><span class="emoji">📶</span><span>Fática</span><div class="hint">toque</div></div><div class="flip-back">Foco no CANAL. Verifica/mantém comunicação aberta. Ex: "Alô?", "estou te ouvindo", saudações.</div></div></div>
+      <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-inner"><div class="flip-front"><span class="emoji">🔑</span><span>Metalinguística</span><div class="hint">toque</div></div><div class="flip-back">Foco no CÓDIGO. Linguagem que fala sobre ela mesma. Ex: gramática, dicionário, poema que fala de poesia.</div></div></div>
+    </div>
+  </div>
+
+  <!-- LITERATURA -->
+  <div id="panel-literatura" class="panel">
+    <div class="section-title"><div class="dot" style="background:var(--accent1)"></div>Trovadorismo — Do Rompante à Racionalidade</div>
+    <div class="info-box">O <strong>Trovadorismo</strong> dá início à história da literatura em língua portuguesa. Inicia-se no século XII e finda no século XV, deixando grande legado. A principal produção pertence aos gêneros lírico e satírico, na forma de <strong>cantigas</strong>.</div>
+
+    <div class="section-title" style="margin-top:1.5rem"><div class="dot" style="background:var(--accent2)"></div>Tipos de Cantigas — clique para expandir</div>
+    <div class="timeline">
+      <div class="timeline-item" onclick="this.classList.toggle('open')">
+        <div class="timeline-head"><span class="timeline-year">AMOR</span><span class="timeline-name">💕 Cantigas de Amor</span></div>
+        <div class="timeline-body">Expressavam os <strong>sentimentos amorosos do cavaleiro pela dama</strong>. O eu lírico é masculino. A dama era idealizada e distante. Tema: sofrimento por amor não correspondido (coita amorosa).</div>
+      </div>
+      <div class="timeline-item" onclick="this.classList.toggle('open')">
+        <div class="timeline-head"><span class="timeline-year">AMIGO</span><span class="timeline-name">👩 Cantigas de Amigo</span></div>
+        <div class="timeline-body"><strong>Eu lírico feminino</strong> — a mulher fala de seus sentimentos amorosos. Geralmente uma jovem que sente saudade do amado (amigo = namorado/amado). Linguagem mais simples e popular.</div>
+      </div>
+      <div class="timeline-item" onclick="this.classList.toggle('open')">
+        <div class="timeline-head"><span class="timeline-year">SÁTIRA</span><span class="timeline-name">😂 Cantigas de Escárnio</span></div>
+        <div class="timeline-body">Envolviam <strong>ironia e crítica indireta</strong>. Criticavam comportamentos, costumes e pessoas de forma velada, usando duplo sentido e humor.</div>
+      </div>
+      <div class="timeline-item" onclick="this.classList.toggle('open')">
+        <div class="timeline-head"><span class="timeline-year">SÁTIRA</span><span class="timeline-name">😤 Cantigas de Maldizer</span></div>
+        <div class="timeline-body">Críticas <strong>ofensivas e diretas</strong> — muitas vezes citavam nomes de pessoas específicas. Eram mais agressivas que as de escárnio. Preservadas em cancioneiros.</div>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top:1rem"><strong>Contexto histórico:</strong> Feudos, guerras, suserania e vassalagem. O Trovadorismo contribuiu para o estabelecimento da língua <strong>galego-portuguesa</strong> como oficial do reino de Portugal no século XIII, sob o reinado de <strong>Dom Dinis I</strong> (rei-trovador).</div>
+
+    <div class="info-box orange" style="margin-top:0.5rem"><strong>Principais autores:</strong> João Soares de Paiva (mais antigo nos manuscritos), João Zorro, Martin Codax, Paio Soares de Taveirós, João Garcia de Guilhade, Vasco Martins de Resende, D. Dinis I, Afonso X.</div>
+
+    <div class="section-title" style="margin-top:2rem"><div class="dot" style="background:var(--accent3)"></div>Humanismo</div>
+    <div class="info-box green"><strong>Humanismo:</strong> movimento de transição do Trovadorismo para o Classicismo. Surgiu no século XIV, na Itália. Caracterizado pela presença de elementos medievais e renascentistas. Valoriza a cultura greco-latina, o <strong>antropocentrismo</strong> (homem no centro) e a razão.</div>
+
+    <div class="cards-grid" style="margin-top:1rem">
+      <div class="card">
+        <h3>🏛️ Características</h3>
+        <ul>
+          <li>Valorização da cultura greco-latina</li>
+          <li>Antropocentrismo (homem no centro)</li>
+          <li>Valorização da razão e da ciência</li>
+          <li>Retomada dos valores da Antiguidade Clássica</li>
+          <li>Na poesia: equilíbrio entre emoção e razão</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>✍️ Gil Vicente</h3>
+        <p>Dramaturgo humanista português. Suas obras, como <em>Auto da Barca do Inferno</em>, criticavam costumes e colocavam o indivíduo no centro do drama. Suas peças misturam ironia, moralização e crítica de costumes.</p>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:2rem"><div class="dot" style="background:var(--accent4)"></div>Flashcards — Literatura Medieval</div>
+    <div class="flip-grid">
+      <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-inner"><div class="flip-front"><span class="emoji">🎵</span><span>Trovadorismo</span><div class="hint">toque</div></div><div class="flip-back">1ª fase da literatura em língua portuguesa. Séc. XII–XV. Cantigas líricas (amor, amigo) e satíricas (escárnio, maldizer). Trovadores eram músicos-poetas.</div></div></div>
+      <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-inner"><div class="flip-front"><span class="emoji">👑</span><span>Dom Dinis I</span><div class="hint">toque</div></div><div class="flip-back">Rei de Portugal (séc. XIII) e também trovador. Estabeleceu o galego-português como língua oficial. Um dos mais prolíficos poetas do Trovadorismo.</div></div></div>
+      <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-inner"><div class="flip-front"><span class="emoji">🌟</span><span>Humanismo</span><div class="hint">toque</div></div><div class="flip-back">Transição Trovadorismo → Classicismo. Séc. XIV, Itália. Antropocentrismo, razão, valorização greco-latina. Em Portugal: Gil Vicente (teatro humanista).</div></div></div>
+      <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-inner"><div class="flip-front"><span class="emoji">🎭</span><span>Auto da Barca</span><div class="hint">toque</div></div><div class="flip-back">Obra de Gil Vicente. Peça teatral humanista que critica os costumes da sociedade medieval. Ironia, moralização e crítica de costumes.</div></div></div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="panel-quiz" class="panel">
+    <div class="section-title"><div class="dot" style="background:var(--accent1)"></div>Quiz — Teste seus Conhecimentos</div>
+    <div class="quiz-wrap">
+      <div id="quiz-main">
+        <div class="question-box">
+          <div class="q-counter" id="q-counter">Questão 1 de 25</div>
+          <div class="q-text" id="q-text"></div>
+          <div class="options" id="options"></div>
+          <div class="feedback" id="feedback"></div>
+        </div>
+        <div class="quiz-actions">
+          <button class="btn" id="next-btn" onclick="nextQuestion()" style="display:none">Próxima →</button>
+          <div class="score-bar"><div class="score-fill" id="score-fill" style="width:0%"></div></div>
+          <span class="score-text" id="score-text">0/0</span>
+        </div>
+      </div>
+      <div class="result-panel" id="result-panel">
+        <div class="result-score" id="result-score"></div>
+        <div class="result-msg" id="result-msg"></div>
+        <button class="btn" onclick="restartQuiz()">↺ Refazer Quiz</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESUMO -->
+  <div id="panel-resumo" class="panel">
+    <div class="section-title"><div class="dot" style="background:var(--accent1)"></div>Resumo Geral — Língua Portuguesa</div>
+    <div style="display:flex;flex-direction:column;gap:1rem">
+      <div class="card" style="border-color:rgba(230,57,70,0.3)">
+        <h3 style="color:var(--accent1)">📰 Textos Jornalísticos</h3>
+        <p><strong>Primeira página:</strong> cabeçalho, manchete, chamadas, linha fina, imagens, legenda. Texto multimodal.<br>
+        <strong>Reportagem:</strong> investigativa, caráter informal, estrutura com lide e intertítulos.<br>
+        <strong>Notícia:</strong> informativa, objetiva, estrutura: título + lide (o quê, quem, quando, onde).</p>
+      </div>
+      <div class="card" style="border-color:rgba(244,162,97,0.3)">
+        <h3 style="color:var(--accent2)">💬 Língua & Linguagem</h3>
+        <p><strong>Língua:</strong> sistema de regras gramaticais de um grupo. <strong>Linguagem:</strong> qualquer sistema de comunicação (verbal ou não verbal).<br>
+        <strong>Gram. normativa:</strong> normas formais. <strong>Gram. internalizada:</strong> assimilada naturalmente.<br>
+        <strong>Variações:</strong> situacional, sociocultural, geográfica, histórica.</p>
+      </div>
+      <div class="card" style="border-color:rgba(82,183,136,0.3)">
+        <h3 style="color:var(--accent3)">📝 Tipos Textuais</h3>
+        <p><strong>Descritivo:</strong> descreve características. <strong>Narrativo:</strong> relata fatos com tempo/espaço. <strong>Argumentativo:</strong> defende ponto de vista. <strong>Expositivo:</strong> transmite conhecimento sem opinião. <strong>Injuntivo:</strong> instrui a fazer algo.<br>
+        <strong>Gêneros textuais:</strong> textos concretos que circulam em sociedade (carta, notícia, receita...).</p>
+      </div>
+      <div class="card" style="border-color:rgba(199,125,255,0.3)">
+        <h3 style="color:var(--accent4)">📡 Funções da Linguagem</h3>
+        <p><strong>Expressiva</strong> (remetente) | <strong>Apelativa</strong> (destinatário) | <strong>Referencial</strong> (contexto) | <strong>Poética</strong> (mensagem) | <strong>Fática</strong> (canal) | <strong>Metalinguística</strong> (código)</p>
+      </div>
+      <div class="card" style="border-color:rgba(230,57,70,0.3)">
+        <h3 style="color:var(--accent1)">📖 Literatura Medieval</h3>
+        <p><strong>Trovadorismo</strong> (séc. XII–XV): cantigas de amor (eu lírico masc.), de amigo (eu lírico fem.), de escárnio (ironia indireta), de maldizer (crítica direta). Dom Dinis I = rei-trovador.<br>
+        <strong>Humanismo</strong> (séc. XIV+): antropocentrismo, razão, greco-latim. Gil Vicente = Auto da Barca do Inferno.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function showTab(name, el) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    el.classList.add('active');
+  }
+
+  const comData = {
+    remetente:    { text: '👤 REMETENTE: Quem envia a mensagem. O emissor do ato comunicativo. Função da linguagem associada: Expressiva/Emotiva (foca nos sentimentos do remetente).' },
+    destinatario: { text: '👥 DESTINATÁRIO: Quem recebe a mensagem. O receptor do ato comunicativo. Função associada: Apelativa/Conativa (mensagem direcionada ao receptor).' },
+    mensagem:     { text: '💬 MENSAGEM: O conteúdo que é transmitido. Aquilo que se quer comunicar. Função associada: Poética (foca na forma estética da mensagem).' },
+    canal:        { text: '📶 CANAL / CONTATO: O meio pelo qual a mensagem é transmitida (voz, papel, internet, telefone). Função associada: Fática (verifica se o canal está funcionando).' },
+    codigo:       { text: '🔑 CÓDIGO: O sistema de sinais usado (língua portuguesa, libras, código Morse...). Função associada: Metalinguística (linguagem que fala sobre o próprio código).' },
+    contexto:     { text: '🌍 REFERENTE / CONTEXTO: O assunto sobre o qual se fala; a realidade a que a mensagem se refere. Função associada: Referencial/Denotativa (transmite informações objetivas sobre o contexto).' },
+  };
+  function showCom(key) {
+    document.getElementById('com-info').textContent = comData[key].text;
+  }
+
+  const questions = [
+    {q:'O que é a Manchete de um jornal?',opts:['O texto que acompanha a fotografia','O título principal da matéria, com letras maiores para destaque gráfico','Os textos curtos que anunciam as matérias do jornal','A frase abaixo do título que complementa as informações'],correct:1,explain:'Manchete = título da matéria principal. Traz mensagem concisa com letras maiores para se destacar graficamente na página.'},
+    {q:'A Linha Fina em um texto jornalístico é:',opts:['O nome do jornalista autor','A frase abaixo do título que complementa as informações da matéria','O texto que acompanha a fotografia','Os títulos das matérias secundárias'],correct:1,explain:'Linha fina = frase que aparece logo abaixo do título, complementando suas informações. É mais detalhada que a manchete.'},
+    {q:'O Lide de uma notícia responde a quais perguntas?',opts:['Por quê, como, quanto','O quê, quem, quando, onde','Quem, onde, por quê, como','Quando, onde, quanto, para quê'],correct:1,explain:'O Lide é o parágrafo inicial que concentra as informações essenciais da notícia, respondendo: o quê aconteceu, quem envolveu, quando e onde ocorreu.'},
+    {q:'O que diferencia Reportagem de Notícia?',opts:['A notícia é mais extensa e investigativa','A reportagem é mais extensa, investigativa e pode usar linguagem informal; a notícia é objetiva e concisa','São a mesma coisa com nomes diferentes','A reportagem só usa texto verbal'],correct:1,explain:'Reportagem: mais extensa, caráter investigativo, linguagem pode ser informal. Notícia: texto informativo objetivo e conciso sobre um fato.'},
+    {q:'Texto multimodal é aquele que:',opts:['Usa apenas linguagem verbal escrita','Utiliza apenas imagens sem texto','Usa mais de uma linguagem em sua composição (verbal + não verbal)','É publicado em múltiplos meios de comunicação'],correct:2,explain:'Texto multimodal combina mais de uma linguagem: verbal (palavras) + não verbal (imagens, gráficos, infográficos). A primeira página de jornal é um exemplo.'},
+    {q:'Qual é a diferença entre Língua e Linguagem?',opts:['São sinônimos','Língua é um sistema de regras gramaticais de um grupo; Linguagem é qualquer sistema de comunicação (verbal ou não verbal)','Língua é falada; Linguagem é escrita','Linguagem é formal; Língua é informal'],correct:1,explain:'Língua = sistema de regras gramaticais específicas de um grupo (ex: português). Linguagem = qualquer sistema de sinais que permite comunicação, verbal ou não verbal.'},
+    {q:'Gramática Internalizada é:',opts:['A gramática ensinada nas escolas','A gramática dos gramáticos clássicos','A gramática assimilada naturalmente por todo falante ao usar a língua','O conjunto de normas da língua culta'],correct:2,explain:'Gramática internalizada = aprendida naturalmente, sem estudo formal, apenas pelo uso e convívio com a língua. Todo falante nativo tem uma gramática internalizada.'},
+    {q:'Qual das seguintes NÃO é um tipo de variação linguística?',opts:['Situacional','Sociocultural','Geográfica (regional)','Tecnológica'],correct:3,explain:'As variações linguísticas são: situacional, sociocultural, geográfica (regional) e histórica. Variação tecnológica não é uma categoria linguística reconhecida.'},
+    {q:'O tipo textual INJUNTIVO tem como objetivo:',opts:['Descrever características de pessoas ou lugares','Relatar fatos em determinado tempo e espaço','Instruir o leitor a fazer algo','Transmitir conhecimento sem incluir opiniões'],correct:2,explain:'Tipo injuntivo instrui/orienta o leitor a realizar algo. Usa verbos no imperativo. Ex: receita culinária, manual de instruções, bula de remédio.'},
+    {q:'O tipo textual EXPOSITIVO se caracteriza por:',opts:['Defender um ponto de vista com argumentos','Transmitir um conhecimento sem a inclusão de opiniões','Instruir o leitor a realizar ações','Relatar fatos imaginários com personagens'],correct:1,explain:'Expositivo transmite conhecimento de forma objetiva, sem opiniões. Ex: verbete de enciclopédia, relatório científico, artigo informativo.'},
+    {q:'Qual a diferença entre Tipo Textual e Gênero Textual?',opts:['São a mesma coisa','Tipo textual é a forma de organização; Gênero textual é o texto concreto que circula na sociedade','Gênero é a forma; Tipo é o texto concreto','Tipo é literário; Gênero é jornalístico'],correct:1,explain:'Tipo textual = forma como o texto se organiza (narrativo, descritivo...). Gênero textual = texto concreto que circula na sociedade (carta, notícia, receita...), concretizando os tipos.'},
+    {q:'A Função Expressiva/Emotiva da linguagem tem foco em:',opts:['Destinatário','Canal','Remetente','Mensagem'],correct:2,explain:'Função Expressiva foca no REMETENTE — expressa sentimentos, emoções e subjetividade do emissor. Ex: interjeições, poesia lírica, desabafos.'},
+    {q:'A Função Apelativa/Conativa da linguagem tem foco em:',opts:['Destinatário','Remetente','Código','Contexto'],correct:0,explain:'Função Apelativa foca no DESTINATÁRIO — busca influenciar, persuadir ou ordenar ao receptor. Usa vocativos e verbos no imperativo. Ex: propagandas, discursos políticos.'},
+    {q:'"Alô? Está me ouvindo?" — Qual função da linguagem está sendo exercida?',opts:['Expressiva','Poética','Fática','Metalinguística'],correct:2,explain:'Função Fática foca no CANAL — verifica ou mantém o canal de comunicação aberto. Ex: "Alô?", "está aí?", saudações protocolares.'},
+    {q:'Um dicionário de língua portuguesa exerce qual função da linguagem?',opts:['Expressiva','Apelativa','Referencial','Metalinguística'],correct:3,explain:'Metalinguística foca no CÓDIGO — quando a linguagem fala sobre ela mesma. Um dicionário explica palavras usando palavras = linguagem sobre linguagem.'},
+    {q:'O Trovadorismo marca o início da literatura em língua portuguesa, iniciando-se no século:',opts:['X','XII','XIV','XVI'],correct:1,explain:'O Trovadorismo se inicia no século XII (1200) e finda no século XV (1400-1500). É a 1ª manifestação literária em língua portuguesa/galego-portuguesa.'},
+    {q:'Nas Cantigas de Amigo, o eu lírico é:',opts:['Masculino — o cavaleiro que sofre por amor','Feminino — a mulher que sente saudade do amado','Neutro — narrador onisciente','Dual — homem e mulher dialogam'],correct:1,explain:'Cantigas de amigo = eu lírico feminino. Uma jovem (normalmente simples, popular) expressa saudade ou amor pelo "amigo" (namorado/amado). Linguagem mais popular e simples.'},
+    {q:'As Cantigas de Escárnio se diferem das de Maldizer porque:',opts:['São mais longas e detalhadas','Usam ironia e crítica indireta, enquanto as de maldizer são diretas e ofensivas','São exclusivamente sobre amor','Só eram cantadas por nobres'],correct:1,explain:'Escárnio = crítica indireta com ironia e duplo sentido. Maldizer = crítica direta e ofensiva, muitas vezes citando nomes. Ambas são cantigas satíricas.'},
+    {q:'Dom Dinis I é importante para o Trovadorismo porque:',opts:['Proibiu as cantigas satíricas','Era também trovador e estabeleceu o galego-português como língua oficial do reino','Escreveu o maior cancioneiro da época','Foi o último trovador antes do Humanismo'],correct:1,explain:'Dom Dinis I era um rei-trovador (compôs cantigas) e estabeleceu o galego-português como língua oficial de Portugal no séc. XIII, contribuindo para a consolidação da literatura portuguesa.'},
+    {q:'O Humanismo se caracteriza principalmente pela:',opts:['Valorização do teocentrismo (Deus no centro)','Valorização do antropocentrismo (homem no centro), razão e cultura greco-latina','Criação das cantigas medievais','Ruptura total com a cultura clássica'],correct:1,explain:'Humanismo = antropocentrismo (homem no centro do universo, não Deus), valorização da razão, da ciência e da cultura greco-latina. Transição do medievo para a modernidade.'},
+    {q:'Gil Vicente foi importante no Humanismo português como:',opts:['Poeta lírico das cantigas de amor','Dramaturgo que criticava os costumes da sociedade em suas peças teatrais','Gramático que codificou a língua portuguesa','Cronista das descobertas marítimas'],correct:1,explain:'Gil Vicente = grande dramaturgo humanista português. Suas peças (como Auto da Barca do Inferno) criticavam os costumes, misturando ironia, moralização e crítica de costumes. Colocava o indivíduo no centro.'},
+    {q:'A Função Referencial/Denotativa tem foco no:',opts:['Remetente','Destinatário','Referente/Contexto','Canal'],correct:2,explain:'Função Referencial foca no CONTEXTO/REFERENTE — transmite informações objetivas sobre a realidade. Linguagem denotativa (sentido literal). Ex: notícias, textos científicos, enciclopédias.'},
+    {q:'O tipo textual ARGUMENTATIVO se caracteriza por:',opts:['Descrever um ambiente ou personagem','Relatar fatos com tempo e espaço definidos','Defender um ponto de vista com argumentos','Instruir o leitor a realizar uma ação'],correct:2,explain:'Argumentativo defende uma tese/ponto de vista usando argumentos para convencer o leitor. Ex: artigo de opinião, redação do ENEM, editorial de jornal.'},
+    {q:'A Legenda em um texto jornalístico é:',opts:['O título da matéria principal','O texto que acompanha a fotografia, descrevendo e acrescentando informações','A frase abaixo do título','Os textos curtos que anunciam matérias'],correct:1,explain:'Legenda = texto que acompanha a fotografia. Além de descrever e situar o que é retratado, acrescenta informações à matéria à qual está vinculada.'},
+    {q:'A Função Poética da linguagem foca em:',opts:['Remetente','Destinatário','Mensagem','Canal'],correct:2,explain:'Função Poética foca na MENSAGEM em si — na sua forma estética, sonoridade, escolha de palavras. Presente na literatura, publicidade criativa e qualquer texto que valorize a beleza da linguagem.'},
+  ];
+
+  let currentQ=0, score=0, answered=false;
+
+  function renderQuestion() {
+    const q=questions[currentQ];
+    document.getElementById('q-counter').textContent=`Questão ${currentQ+1} de ${questions.length}`;
+    document.getElementById('q-text').textContent=q.q;
+    const opts=document.getElementById('options');
+    opts.innerHTML='';
+    q.opts.forEach((opt,i)=>{
+      const btn=document.createElement('button');
+      btn.className='opt-btn'; btn.textContent=opt;
+      btn.onclick=()=>selectAnswer(i);
+      opts.appendChild(btn);
+    });
+    document.getElementById('feedback').className='feedback';
+    document.getElementById('feedback').textContent='';
+    document.getElementById('next-btn').style.display='none';
+    answered=false;
+  }
+
+  function selectAnswer(idx) {
+    if(answered) return; answered=true;
+    const q=questions[currentQ];
+    document.querySelectorAll('.opt-btn').forEach((b,i)=>{
+      b.disabled=true;
+      if(i===q.correct) b.classList.add('correct');
+      else if(i===idx) b.classList.add('wrong');
+    });
+    const fb=document.getElementById('feedback');
+    if(idx===q.correct){score++; fb.className='feedback show ok'; fb.textContent='✓ Correto! '+q.explain;}
+    else{fb.className='feedback show bad'; fb.textContent='✗ Errado. '+q.explain;}
+    updateScore();
+    document.getElementById('next-btn').style.display='block';
+  }
+
+  function updateScore(){
+    document.getElementById('score-fill').style.width=(score/questions.length*100)+'%';
+    document.getElementById('score-text').textContent=`${score}/${questions.length}`;
+  }
+
+  function nextQuestion(){
+    currentQ++;
+    if(currentQ>=questions.length) showResult();
+    else renderQuestion();
+  }
+
+  function showResult(){
+    document.getElementById('quiz-main').style.display='none';
+    document.getElementById('result-panel').classList.add('show');
+    document.getElementById('result-score').textContent=`${score}/${questions.length}`;
+    const pct=Math.round(score/questions.length*100);
+    document.getElementById('result-msg').textContent=
+      pct===100?'🏆 Perfeito! Você dominou Língua Portuguesa!':
+      pct>=75?'🎯 Muito bem! Revise os erros.':
+      pct>=50?'📚 Metade certa! Continue estudando.':'💪 Revise o conteúdo e tente de novo!';
+  }
+
+  function restartQuiz(){
+    currentQ=0; score=0; answered=false;
+    document.getElementById('quiz-main').style.display='block';
+    document.getElementById('result-panel').classList.remove('show');
+    updateScore(); renderQuestion();
+  }
+
+  renderQuestion();
+</script>
+</body>
+</html>
